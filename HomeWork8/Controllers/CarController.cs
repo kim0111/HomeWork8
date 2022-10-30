@@ -1,4 +1,4 @@
-﻿using HomeWork8.Data;
+using HomeWork8.Data;
 using HomeWork8.Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -68,6 +68,75 @@ namespace HomeWork8.Controllers
             return Ok();
         }
 
+        [HttpPut]
+        [Route("Id")]
+        public async Task<IActionResult> Put(int Id, Car car)
+        {
+            if (Id == car.Id)
+            {
+
+                var carObject = _dbConext.Cars.FindAsync(Id);
+
+                try
+                {
+                    if (await carObject != null)
+                    {
+                        _dbConext.Entry(carObject).State = EntityState.Modified;
+                        await _dbConext.SaveChangesAsync();
+                    }
+                    else
+                    {
+                        _dbConext.Cars.Add(car);
+                    }
+
+                    await _dbConext.SaveChangesAsync();
+                }
+
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (Id != car.Id)
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+
+                }
+
+            }
+            else
+            {
+                return BadRequest();
+            }
+
+            return NoContent();
+        }
+
+
+        [HttpPatch]
+        [Route("Id")]
+        public async Task<IActionResult> Patch(int Id, Car car)
+        {
+            var cId = await _dbConext.Cars.SingleAsync(x => x.Id == Id);
+
+            
+            cId.Name = car.Name;
+            cId.Color = car.Color;
+            cId.Age = car.Age;
+            cId.Price = car.Price;
+            cId.Type = car.Type;
+            cId.Engine = car.Engine;
+            cId.IsKz = car.IsKz;
+
+            await _dbConext.SaveChangesAsync();
+
+            return Ok();
+        }
+
 
     }
+
 }
+
